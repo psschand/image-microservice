@@ -1,0 +1,32 @@
+version: "3"
+
+services:
+  image-storage:
+    build: ./image-storage
+    container_name: image-storage
+    environment:
+      - FLASK_ENV=dev
+      - DATABASE_URI=postgresql://postgres:developpassword@image-storage-db/postgres
+    depends_on:
+      - image-storage-db
+    volumes:
+      - "./image-storage:/code"
+  image-storage-db:
+    image: postgres
+    environment:
+      - POSTGRES_PASSWORD=developpassword
+  image-transforms:
+    build: ./image-transforms
+    container_name: image-transforms
+    environment:
+      - FLASK_ENV=dev
+    volumes:
+      - "./image-transforms:/code"
+  nginx:
+    build: ./nginx
+    container_name: nginx-proxy
+    ports:
+      - "8080:8080"
+    depends_on:
+      - image-storage
+      - image-transforms
